@@ -27,7 +27,6 @@ var (
 	bench_time   = flag.Int("bench_time", 60, "Bench time (seconds)")
 	queries_file = flag.String("queries_file", "queries.txt", "File with queries")
 	db           *sql.DB
-	mu           sync.Mutex
 	counter      uint64 = 0
 )
 
