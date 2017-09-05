@@ -19,14 +19,14 @@ import (
 )
 
 var (
-	pghost       = flag.String("host", "localhost", "Host")
-	pgport       = flag.Int("port", 5432, "Port")
-	pguser       = flag.String("user", "$USER", "User")
-	pgdatabase   = flag.String("database", "postgres", "Database")
-	connections  = flag.Int("connections", 0, "Connections count (by default number of cores)")
-	bench_time   = flag.Int("bench_time", 60, "Bench time (seconds)")
-	queries_file = flag.String("queries_file", "queries.txt", "File with queries")
-	db           *sql.DB
+	pghost              = flag.String("host", "localhost", "Host")
+	pgport              = flag.Int("port", 5432, "Port")
+	pguser              = flag.String("user", "$USER", "User")
+	pgdatabase          = flag.String("database", "postgres", "Database")
+	connections         = flag.Int("connections", 0, "Connections count (by default number of cores)")
+	bench_time          = flag.Int("bench_time", 60, "Bench time (seconds)")
+	fill                = flag.Bool("fill", false, "Get random texts and fill database")
+	queries_file        = flag.String("queries_file", "queries.txt", "File with queries")
 	counter      uint64 = 0
 )
 
@@ -64,6 +64,7 @@ func makeQuery(db *sql.DB, sql string) {
 func listener(wg *sync.WaitGroup, chm chan int, queries []string) {
 	var err error
 	var tsquery string
+	var db *sql.DB
 
 	defer wg.Done()
 
@@ -128,6 +129,7 @@ func main() {
 	}()
 
 	flag.Parse()
+
 	if *pguser == "$USER" {
 		userdata, err := user.Current()
 		if err != nil {
@@ -142,5 +144,11 @@ func main() {
 
 	log.Println("Number of connections: ", *connections)
 	log.Println("Database: ", *pgdatabase)
+
+	if *fill {
+		getTexts()
+		os.Exit(0)
+	}
+
 	processQueries()
 }
